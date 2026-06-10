@@ -1,16 +1,31 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import gsap from 'gsap'
 
+const readPct = ref(0)
+
+function onScroll() {
+  const el = document.documentElement
+  const scrolled = el.scrollTop || document.body.scrollTop
+  const total = el.scrollHeight - el.clientHeight
+  readPct.value = total > 0 ? Math.min(100, (scrolled / total) * 100) : 0
+}
+
 onMounted(() => {
+  window.addEventListener('scroll', onScroll, { passive: true })
   gsap.from('.privacy-hero__title', { opacity: 0, y: 32, duration: 0.7, ease: 'power3.out' })
   gsap.from('.privacy-hero__meta',  { opacity: 0, y: 16, duration: 0.5, ease: 'power3.out', delay: 0.2 })
   gsap.from('.privacy-section',     { opacity: 0, y: 24, duration: 0.5, stagger: 0.1, ease: 'power2.out', delay: 0.35 })
 })
+
+onUnmounted(() => window.removeEventListener('scroll', onScroll))
 </script>
 
 <template>
   <div class="privacy-page">
+    <!-- reading progress bar -->
+    <div class="read-bar" :style="{ width: readPct + '%' }" />
+
     <!-- navbar spacer -->
     <nav class="privacy-nav">
       <div class="container privacy-nav__inner">
@@ -222,6 +237,19 @@ onMounted(() => {
   min-height: 100vh;
   background: var(--white);
   color: var(--brand-dark);
+}
+
+/* reading bar */
+.read-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--brand-primary), #7c6af0);
+  z-index: 200;
+  transition: width 0.1s linear;
+  border-radius: 0 2px 2px 0;
+  pointer-events: none;
 }
 
 /* nav */
